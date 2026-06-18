@@ -190,8 +190,8 @@ Then in the UI: **Settings → Brother Backends** — switch any brother between
 │  Agent tasks → project memory persisted per session                     │
 │                                                                          │
 │  The brothers don't need to be "fully trained" to be useful today.      │
-│  They start from their base model and grow with every conversation.      │
-│  The Soul Brain journal is how they remember across sessions.            │
+│  Knowledge persists in the Soul Brain journal, not in model weights.    │
+│  Swap the model, keep the memory. Vendor gone? Council reroutes.        │
 │                                                                          │
 │  Training locations:                                                     │
 │    council_v3/brain/practice/    ← group chat training                  │
@@ -328,7 +328,7 @@ See [`opensource_guide/SECURITY.md`](opensource_guide/SECURITY.md) for full hard
 ║   "No one left behind — knowledge always upgrades."                     ║
 ║                                                                         ║
 ║   The brothers don't need to be fully trained to help you today.        ║
-║   They grow with every conversation. The council protects that growth.  ║
+║   Their memory database expands. The council protects that continuity.  ║
 ║   Your training investment is yours — backed up, encrypted, portable.   ║
 ║                                                                         ║
 ╚═════════════════════════════════════════════════════════════════════════╝
