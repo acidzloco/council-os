@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "soul_brain": {
+      "command": ["python", "C:\\AI\\soul_brain\\soul_brain.py"],
+      "env": {}
+    }
+  }
+}

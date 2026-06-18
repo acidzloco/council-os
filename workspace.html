@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>COUNCIL OS v3</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+[x-cloak] { display: none !important; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0f;
+  --bg2: #0f0f18;
+  --border: #1a1a2a;
+  --text: #e0e0e0;
+  --text2: #a0a0b0;
+  --text3: #606070;
+  --orange: #f97316;
+  --blue: #0088ff;
+  --green: #00ff66;
+  --red: #ff4444;
+  --yellow: #ffaa00;
+  --font: 'Consolas', 'Courier New', monospace;
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+}
+
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ─── TOPBAR ─── */
+#topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 20px; }
+.topbar-left h1 { font-size: 16px; font-weight: 700; color: var(--orange); }
+.topbar-nav { display: flex; gap: 20px; font-size: 13px; }
+.topbar-nav span { color: var(--text2); cursor: pointer; }
+.topbar-nav span:hover { color: var(--text); }
+.topbar-right { display: flex; gap: 20px; align-items: center; font-size: 11px; }
+.status { color: var(--green); display: flex; align-items: center; gap: 4px; }
+.status::before { content: '●'; }
+
+/* ─── MAIN LAYOUT ─── */
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  width: 200px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.sidebar-section { padding: 15px 0; border-bottom: 1px solid var(--border); }
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text3);
+  padding: 8px 15px;
+  text-transform: uppercase;
+}
+.sidebar-item {
+  padding: 8px 15px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.sidebar-item.active { color: var(--orange); border-left-color: var(--orange); background: rgba(249,115,22,0.1); }
+.sidebar-icon { font-size: 14px; }
+
+/* ─── CONTENT ─── */
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+#content h2 { font-size: 18px; margin-bottom: 20px; color: var(--text); }
+
+/* ─── CARDS ─── */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 4px;
+}
+.card-title { font-size: 11px; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; }
+.card-value { font-size: 32px; font-weight: 700; color: var(--text); }
+
+/* ─── MODEL BROWSER ─── */
+.model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+.model-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.model-card:hover { border-color: var(--orange); background: rgba(249,115,22,0.05); }
+.model-name { font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.model-source { font-size: 10px; color: var(--text3); margin-bottom: 8px; }
+.model-role { display: inline-block; padding: 3px 8px; background: rgba(255,255,255,0.05); border-radius: 2px; font-size: 10px; color: var(--text2); }
+.deploy-btn { background: var(--orange); color: var(--bg); border: none; padding: 6px 12px; cursor: pointer; font-weight: 700; font-size: 10px; border-radius: 2px; margin-top: 8px; }
+
+/* ─── CHAT ─── */
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding-right: 10px;
+}
+.chat-msg { display: flex; flex-direction: column; gap: 2px; }
+.chat-header { display: flex; gap: 8px; align-items: baseline; }
+.chat-header .name { font-weight: 700; font-size: 11px; }
+.chat-header .time { font-size: 10px; color: var(--text3); }
+.chat-body {
+  background: var(--bg2);
+  border-left: 3px solid;
+  padding: 10px;
+  border-radius: 2px;
+  word-break: break-word;
+  color: var(--text);
+}
+.chat-input-area { border-top: 1px solid var(--border); padding-top: 15px; }
+.chat-input {
+  width: 100%;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px;
+  font-family: var(--font);
+  font-size: 12px;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  resize: none;
+}
+.chat-send {
+  background: var(--orange);
+  color: var(--bg);
+  border: none;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-weight: 700;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+/* ─── HISTORY ─── */
+.history-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.history-item:hover { border-color: var(--orange); }
+.history-date { font-size: 10px; color: var(--text3); }
+.history-preview { color: var(--text2); font-size: 11px; margin-top: 4px; }
+
+/* ─── BRAINSTORM ─── */
+.idea-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 2px;
+}
+.idea-title { font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.idea-meta { font-size: 10px; color: var(--text3); }
+
+/* ─── DRAWING BOARD ─── */
+#canvas-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#drawing-canvas {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  cursor: crosshair;
+  flex: 1;
+}
+.canvas-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.canvas-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  border-radius: 2px;
+}
+.canvas-btn:hover { border-color: var(--orange); }
+.canvas-btn.active { border-color: var(--orange); background: rgba(249,115,22,0.1); }
+
+/* ─── TERMINAL ─── */
+#training-terminal {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.xterm { height: 100%; }
+
+/* ─── SETTINGS ─── */
+.settings-group { margin-bottom: 25px; }
+.settings-group h3 { font-size: 13px; color: var(--orange); margin-bottom: 10px; }
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.setting-label { font-size: 12px; color: var(--text2); }
+.setting-control { display: flex; gap: 8px; }
+.color-picker {
+  width: 40px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.theme-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 11px;
+}
+.theme-btn.active { border-color: var(--orange); background: rgba(249,115,22,0.1); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── EMPTY STATE ─── */
+.empty { color: var(--text3); padding: 40px; text-align: center; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div id="app" x-data="app()" x-init="init()" x-cloak>
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="topbar-left">
+      <h1>🧠 COUNCIL OS v3</h1>
+      <div class="topbar-nav">
+        <span x-text="currentSection.toUpperCase()"></span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status">Bridge Online</div>
+      <span style="color:var(--text3)">Models: <span x-text="modelCount"></span></span>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sidebar-section">
+        <div class="section-title">WORKSPACE</div>
+        <div class="sidebar-item" :class="{active: currentSection === 'overview'}" @click="switchSection('overview')">
+          <span class="sidebar-icon">📊</span> Overview
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'chat'}" @click="switchSection('chat')">
+          <span class="sidebar-icon">💬</span> Chat
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'agents'}" @click="switchSection('agents')">
+          <span class="sidebar-icon">🤖</span> Agents
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">MODELS</div>
+        <div class="sidebar-item" :class="{active: currentSection === 'registry'}" @click="switchSection('registry')">
+          <span class="sidebar-icon">📦</span> Registry
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'training'}" @click="switchSection('training')">
+          <span class="sidebar-icon">⌨</span> Training
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">COUNCIL</div>
+        <div class="sidebar-item" :class="{active: currentSection === 'project'}" @click="switchSection('project')">
+          <span class="sidebar-icon">🚀</span> Project
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'brainstorm'}" @click="switchSection('brainstorm')">
+          <span class="sidebar-icon">🧠</span> Brainstorm
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'history'}" @click="switchSection('history')">
+          <span class="sidebar-icon">📜</span> History
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'terminal'}" @click="switchSection('terminal')">
+          <span class="sidebar-icon">⌨</span> Dojo Terminal
+        </div>
+        <div class="sidebar-item" :class="{active: currentSection === 'drawing'}" @click="switchSection('drawing')">
+          <span class="sidebar-icon">🎨</span> Drawing Board
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">SYSTEM</div>
+        <div class="sidebar-item" :class="{active: currentSection === 'settings'}" @click="switchSection('settings')">
+          <span class="sidebar-icon">⚙</span> Settings
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+      <!-- OVERVIEW -->
+      <div x-show="currentSection === 'overview'">
+        <h2>Overview</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="card-title">🤖 Models</div>
+            <div class="card-value" x-text="modelCount"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🎓 Sessions</div>
+            <div class="card-value" x-text="sessionCount"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">💬 Messages</div>
+            <div class="card-value" x-text="chatMessages.length"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🧠 Council</div>
+            <div class="card-value">4</div>
+          </div>
+        </div>
+
+        <!-- Quick Mode Switch -->
+        <div x-data="quickMode()" x-init="init()" style="margin-top:20px;background:var(--bg2);border:1px solid var(--border);padding:16px">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:12px">QUICK MODE — ALL BROTHERS</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button @click="setAll('local')"
+              :style="allMode==='local' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:bold">
+              LOCAL
+            </button>
+            <button @click="setAll('anthropic')"
+              :style="allMode==='anthropic' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px">
+              Claude
+            </button>
+            <button @click="setAll('gemini')"
+              :style="allMode==='gemini' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px">
+              Gemini
+            </button>
+            <button @click="setAll('deepseek')"
+              :style="allMode==='deepseek' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px">
+              DeepSeek
+            </button>
+            <button @click="setAll('openai')"
+              :style="allMode==='openai' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px">
+              ChatGPT
+            </button>
+            <button @click="setAll('openrouter')"
+              :style="allMode==='openrouter' ? 'background:var(--orange);color:#000' : 'background:var(--bg);color:var(--text);border:1px solid var(--border)'"
+              style="border:none;padding:8px 18px;cursor:pointer;font-family:var(--font);font-size:12px">
+              OpenRouter
+            </button>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center" x-show="allMode && allMode !== 'local'">
+            <input x-model="quickModel" placeholder="model name (blank = default)"
+              style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+            <input x-model="quickKey" placeholder="API key (blank = use .env)"
+              type="password"
+              style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+            <button @click="applyAll()"
+              style="background:var(--orange);color:#000;border:none;padding:5px 14px;cursor:pointer;font-family:var(--font);font-size:12px">
+              Apply
+            </button>
+          </div>
+          <div x-show="allMode === 'local'" style="margin-top:8px">
+            <button @click="applyAll()"
+              style="background:var(--orange);color:#000;border:none;padding:5px 14px;cursor:pointer;font-family:var(--font);font-size:12px">
+              Apply Local
+            </button>
+          </div>
+          <div x-show="modeMsg" x-text="modeMsg" style="font-size:11px;color:var(--green);margin-top:8px"></div>
+          <div style="margin-top:10px;font-size:10px;color:var(--text3)" x-show="brotherStatus">
+            <template x-for="(b, name) in brotherStatus" :key="name">
+              <span style="margin-right:12px">
+                <span :style="`color:${{'byte':'#0088ff','deepseek':'#ff4444','gemini':'#00ff66','advisor':'#ffaa00'}[name]}`" x-text="name.toUpperCase()"></span>:
+                <span x-text="b.backend + '/' + b.model.split(':')[0]" style="color:var(--text3)"></span>
+              </span>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT -->
+      <div x-show="currentSection === 'chat'" style="display:flex;flex-direction:column;height:100%;gap:0">
+        <h2>Group Chat</h2>
+        <div id="chat-messages" x-ref="chatMessages">
+          <template x-for="(msg, i) in chatMessages" :key="i">
+            <div class="chat-msg">
+              <div class="chat-header">
+                <span class="name" :style="`color:${getMsgColor(msg.source)}`" x-text="msg.source.toUpperCase()"></span>
+                <span class="time" x-text="formatTime(msg.timestamp)"></span>
+              </div>
+              <div class="chat-body" :style="`border-left-color:${getMsgColor(msg.source)}`" x-text="msg.content"></div>
+            </div>
+          </template>
+        </div>
+        <div class="chat-input-area">
+          <textarea class="chat-input" x-model="chatInput" placeholder="@byte / @deepseek / @gemini / @advisor / @all"
+                    @keydown="if($event.key==='Enter' && !$event.shiftKey) { $event.preventDefault(); sendChatMessage(); }"></textarea>
+          <button class="chat-send" @click="sendChatMessage()" :disabled="!chatInput.trim()">SEND</button>
+        </div>
+      </div>
+
+      <!-- AGENTS -->
+      <div x-show="currentSection === 'agents'">
+        <h2>Council Brothers — Models & Status</h2>
+        <div class="agent-list">
+          <div class="agent-item">
+            <div style="flex:1">
+              <div class="agent-name">🔵 Byte</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">Model: claude-opus-4-5 (Anthropic)</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px">Role: Security, Low-Level Systems</div>
+            </div>
+            <div class="agent-status">Online</div>
+          </div>
+          <div class="agent-item">
+            <div style="flex:1">
+              <div class="agent-name">🔴 DeepSeek</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">Model: deepseek-chat (DeepSeek)</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px">Role: Reasoning, Architecture</div>
+            </div>
+            <div class="agent-status">Online</div>
+          </div>
+          <div class="agent-item">
+            <div style="flex:1">
+              <div class="agent-name">🟢 Gemini</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">Model: gemini-2.0-flash (Google)</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px">Role: Integration, Execution</div>
+            </div>
+            <div class="agent-status">Online</div>
+          </div>
+          <div class="agent-item">
+            <div style="flex:1">
+              <div class="agent-name">🟡 Advisor</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">Model: gpt-4o (OpenAI/ChatGPT)</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px">Role: Synthesis, Strategy</div>
+            </div>
+            <div class="agent-status">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTRY (BROWSE & ADOPT MODELS) -->
+      <div x-show="currentSection === 'registry'" style="display:grid;grid-template-columns:1fr 1fr;height:100%;gap:10px;overflow:hidden">
+
+        <!-- LEFT: File Browser -->
+        <div style="display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden">
+          <h3 style="font-size:12px;margin:0;padding:10px;border-bottom:1px solid var(--border)">📁 Browse Files</h3>
+
+          <!-- Drive selector -->
+          <div style="padding:10px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">
+            <button @click="selectDrive('C:\\\\')" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);font-size:10px;cursor:pointer;border-radius:2px">C:</button>
+            <button @click="selectDrive('D:\\\\')" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);font-size:10px;cursor:pointer;border-radius:2px">D:</button>
+            <button @click="selectDrive('E:\\\\')" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);font-size:10px;cursor:pointer;border-radius:2px">E:</button>
+            <button @click="selectDrive('F:\\\\')" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);font-size:10px;cursor:pointer;border-radius:2px">F:</button>
+          </div>
+
+          <!-- Current path -->
+          <div style="padding:8px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:9px;color:var(--text3);word-break:break-all" x-text="fileBrowserPath"></div>
+
+          <!-- Files/folders list -->
+          <div style="flex:1;overflow-y:auto;padding:8px">
+            <template x-for="item in fileBrowserItems" :key="item.path">
+              <div style="padding:6px;margin-bottom:4px;background:var(--bg2);border-radius:2px;cursor:pointer;font-size:9px;border-left:3px solid transparent"
+                   @click="item.type === 'file' ? selectFile(item.path) : browsePath(item.path)"
+                   :style="`border-left-color:${item.type === 'folder' ? 'var(--orange)' : 'var(--green)'}`">
+                <span x-text="item.type === 'folder' ? '📁 ' + item.name : '📄 ' + item.name"></span>
+                <span x-show="item.size > 0" style="color:var(--text3);font-size:8px" x-text="' (' + (item.size / (1024*1024)).toFixed(1) + 'MB)'"></span>
+              </div>
+            </template>
+            <div x-show="fileBrowserItems.length === 0" style="text-align:center;padding:20px;color:var(--text3);font-size:10px">
+              <span x-show="!fileBrowserLoading">No files found. Click a drive or folder.</span>
+              <span x-show="fileBrowserLoading">Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Model Form + Registry -->
+        <div style="display:flex;flex-direction:column;overflow:hidden">
+          <h3 style="font-size:12px;margin:0;padding:10px;border-bottom:1px solid var(--border)">🚀 Adopt Model</h3>
+
+          <!-- Model form -->
+          <div style="padding:10px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
+            <input type="text" placeholder="Model name" x-model="newModelName"
+                   style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px;font-size:10px;border-radius:2px">
+            <input type="text" placeholder="Source path (C:\\... or ollama:...)" x-model="newModelSource"
+                   style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px;font-size:10px;border-radius:2px;font-family:monospace">
+            <select x-model="newModelRole" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px;font-size:10px;border-radius:2px">
+              <option>general</option>
+              <option>security</option>
+              <option>teaching</option>
+            </select>
+            <button @click="adoptModel()" style="background:var(--green);color:var(--bg);border:none;padding:6px;cursor:pointer;font-weight:700;border-radius:2px;font-size:10px">ADOPT</button>
+          </div>
+
+          <!-- Registered models -->
+          <div style="padding:10px;border-bottom:1px solid var(--border)">
+            <input type="text" x-model="searchModels" placeholder="Search..."
+                   style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px;font-size:10px;border-radius:2px;width:100%">
+          </div>
+
+          <div style="flex:1;overflow-y:auto;padding:8px">
+            <template x-for="m in filteredModels" :key="m.id">
+              <div style="padding:8px;background:var(--bg2);border-radius:2px;margin-bottom:6px;border-left:3px solid" :style="`border-left-color:${m.source.includes('ollama') ? 'var(--green)' : 'var(--orange)'}`">
+                <div style="font-weight:700;font-size:10px" x-text="m.name"></div>
+                <div style="font-size:8px;color:var(--text3);word-break:break-all;margin:2px 0" x-text="m.source"></div>
+                <div style="font-size:8px;color:var(--text2)" x-text="m.role"></div>
+              </div>
+            </template>
+            <div x-show="registeredModels.length === 0" style="text-align:center;padding:20px;color:var(--text3);font-size:10px">
+              No models registered yet
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRAINING (SIMPLE) -->
+      <div x-show="currentSection === 'training'" style="padding:20px;display:flex;flex-direction:column;gap:15px">
+        <h2>🚀 Training — Practice Here</h2>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button @click="openNotepad()" style="background:var(--green);color:var(--bg);border:none;padding:10px 16px;cursor:pointer;font-weight:700;border-radius:2px;font-size:12px">📝 OPEN NOTEPAD</button>
+          <button @click="openPowerShell()" style="background:var(--orange);color:var(--bg);border:none;padding:10px 16px;cursor:pointer;font-weight:700;border-radius:2px;font-size:12px">🖥 OPEN POWERSHELL</button>
+        </div>
+
+        <div style="background:var(--bg2);padding:15px;border-radius:4px;border-left:3px solid var(--blue)">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px">📋 HOW TO PRACTICE:</div>
+          <div style="font-size:10px;color:var(--text3);line-height:1.8">
+            1. Click <strong>OPEN NOTEPAD</strong><br>
+            2. Go to <strong>CHAT</strong> tab<br>
+            3. Type: <strong>@gemini write python code</strong><br>
+            4. Gemini types in Notepad<br>
+            5. ALL brothers can see it<br>
+            6. @byte @deepseek review it<br>
+            7. Save your work when done
+          </div>
+        </div>
+
+        <div style="background:rgba(0,255,100,0.05);padding:12px;border-left:3px solid var(--green);border-radius:2px">
+          <div style="font-size:10px;color:var(--green);font-weight:700">✓ TRAINING IS THE HEART</div>
+          <div style="font-size:9px;color:var(--text3);line-height:1.6">
+            Practice → Feedback → Learn → Better next session<br>
+            All brothers watch and comment on your training.
+          </div>
+        </div>
+      </div>
+
+      <!-- BRAINSTORM (TOPICS WE DISCUSS) -->
+      <div x-show="currentSection === 'brainstorm'">
+        <h2>Brainstorm — Topics & Projects</h2>
+        <div>
+          <template x-for="topic in brainstormTopics" :key="topic.slug">
+            <div class="idea-item">
+              <div class="idea-title" x-text="topic.title"></div>
+              <div class="idea-meta">
+                <span x-text="`By ${topic.source || '?'}`"></span> |
+                <span x-text="formatTime(topic.updated)"></span>
+              </div>
+              <div style="margin-top:8px;color:var(--text2);font-size:11px;white-space:pre-wrap" x-text="topic.content?.substring(0,200)"></div>
+            </div>
+          </template>
+        </div>
+        <div x-show="brainstormTopics.length === 0" class="empty">
+          No brainstorm topics yet. Ideas from Chat appear here.
+        </div>
+      </div>
+
+      <!-- BRAIN JOURNAL -->
+      <div x-show="currentSection === 'journal'" style="display:flex;flex-direction:column;height:100%;gap:15px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Brain Journal (LISA_SESSION.md)</h2>
+          <button @click="saveJournal()" :disabled="journalSaving"
+                  style="background:var(--green);color:var(--bg);border:none;padding:8px 20px;font-weight:700;border-radius:2px;font-size:12px;cursor:pointer">
+            <span x-text="journalSaving ? 'SAVING...' : '💾 SAVE JOURNAL'"></span>
+          </button>
+        </div>
+        <textarea x-model="journalContent"
+                  style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:20px;font-family:var(--font);font-size:13px;border-radius:4px;resize:none;line-height:1.6"></textarea>
+      </div>
+
+      <!-- HISTORY (PAST CHAT MESSAGES) -->
+      <div x-show="currentSection === 'history'" style="display:flex;flex-direction:column;height:100%;gap:0">
+        <h2>History — All Chat Messages</h2>
+        <button @click="loadChatHistory()" style="background:var(--orange);color:var(--bg);border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:2px;align-self:flex-start;margin-bottom:10px;font-size:11px">REFRESH CHAT</button>
+        <div style="flex:1;overflow-y:auto;padding:10px 0;border:1px solid var(--border);border-radius:2px">
+          <template x-for="(msg, i) in chatMessages" :key="i">
+            <div style="padding:12px;border-bottom:1px solid var(--border);background:var(--bg2)">
+              <div style="display:flex;gap:12px;margin-bottom:6px">
+                <span style="font-weight:700;font-size:11px;min-width:80px;padding:4px 8px;border-radius:2px;text-align:center" :style="`color:${getMsgColor(msg.source)};background:${getMsgColor(msg.source)}22`" x-text="msg.source.toUpperCase()"></span>
+                <span style="font-size:10px;color:var(--text3);align-self:center" x-text="formatTime(msg.timestamp)"></span>
+              </div>
+              <div style="color:var(--text);font-size:12px;white-space:pre-wrap;word-break:break-word;line-height:1.4" x-html="renderMarkdown(msg.content)"></div>
+            </div>
+          </template>
+        </div>
+        <div x-show="chatMessages.length === 0" class="empty" style="margin:20px">
+          No chat history. Start chatting to see messages here.
+        </div>
+      </div>
+
+      <!-- DOJO TERMINAL -->
+      <div x-show="currentSection === 'terminal'" style="display:flex;flex-direction:column;height:100%;gap:0" x-init="initDojoTerminal()">
+        <h2 style="color:var(--orange)">Dojo Terminal — joint practice</h2>
+        <div id="dojo-terminal" style="flex:1;background:#000;border:1px solid var(--orange);padding:10px;overflow:hidden"></div>
+      </div>
+
+      <!-- DRAWING BOARD (LIGHTWEIGHT) -->
+      <div x-show="currentSection === 'drawing'" style="display:flex !important;flex-direction:column;height:100%;gap:0;padding:20px">
+        <h2>🎨 Drawing Board — Flowcharts & Diagrams</h2>
+
+        <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+          <button @click="drawMode='pen'" :class="{active: drawMode==='pen'}" class="canvas-btn" style="background:var(--green);color:var(--bg);padding:8px 16px;font-weight:700">✏ PEN</button>
+          <button @click="drawMode='eraser'" :class="{active: drawMode==='eraser'}" class="canvas-btn" style="background:var(--orange);color:var(--bg);padding:8px 16px;font-weight:700">🧹 ERASER</button>
+          <button @click="clearCanvas()" class="canvas-btn" style="background:var(--red);color:var(--bg);padding:8px 16px">🗑 CLEAR</button>
+          <button @click="saveDrawing()" class="canvas-btn" style="background:var(--blue);color:var(--bg);padding:8px 16px">💾 SAVE PNG</button>
+          <span style="color:var(--text3);font-size:11px;align-self:center">|</span>
+          <input type="color" x-model="drawColor" style="width:40px;height:32px;cursor:pointer;border:1px solid var(--border);border-radius:2px">
+          <label style="font-size:10px;color:var(--text2);align-self:center">Size: <input type="range" x-model.number="brushSize" min="1" max="20" step="1" style="width:80px;vertical-align:middle;cursor:pointer"></label>
+        </div>
+
+        <canvas id="drawing-canvas" x-ref="canvas" style="flex:1;border:2px solid var(--border);border-radius:4px;background:#1a1a1a;display:block;cursor:crosshair"></canvas>
+      </div>
+
+      <!-- PROJECT R1/R2/R3 -->
+      <div x-show="currentSection === 'project'" style="display:flex;flex-direction:column;gap:20px">
+        <h2>Project — R1 / R2 / R3</h2>
+
+        <!-- task input -->
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;border-radius:4px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">New Task</div>
+          <textarea x-model="projectTask" placeholder="Describe the task... e.g. build a binary search function"
+            style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:10px;font-family:var(--font);font-size:12px;border-radius:2px;resize:none;height:80px;margin-bottom:12px"></textarea>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <select x-model="projectExt" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:8px 12px;font-family:var(--font);font-size:12px;border-radius:2px">
+              <option value=".py">Python .py</option>
+              <option value=".js">JavaScript .js</option>
+              <option value=".html">HTML .html</option>
+              <option value=".cpp">C++ .cpp</option>
+              <option value=".c">C .c</option>
+              <option value=".rs">Rust .rs</option>
+              <option value=".go">Go .go</option>
+              <option value=".ts">TypeScript .ts</option>
+              <option value=".mq5">MQL5 .mq5</option>
+              <option value=".sh">Bash .sh</option>
+              <option value=".sql">SQL .sql</option>
+              <option value=".json">JSON .json</option>
+            </select>
+            <button @click="runProject()" :disabled="!projectTask.trim() || projectRunning"
+              style="background:var(--orange);color:var(--bg);border:none;padding:8px 24px;font-weight:700;font-size:12px;cursor:pointer;border-radius:2px"
+              x-text="projectRunning ? 'RUNNING...' : '▶ RUN R1→R2→R3'"></button>
+            <span x-show="projectPhase" x-text="'Phase: ' + projectPhase.toUpperCase()" style="font-size:11px;color:var(--yellow)"></span>
+          </div>
+        </div>
+
+        <!-- progress cards -->
+        <div x-show="projectTaskId" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+          <template x-for="bro in ['byte','deepseek','gemini','advisor']" :key="bro">
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:15px;border-radius:4px">
+              <div style="font-weight:700;margin-bottom:10px" :style="`color:${speakerColors[bro]}`" x-text="bro.toUpperCase()"></div>
+              <div style="font-size:10px;margin-bottom:4px">
+                <span style="color:var(--text3)">R1: </span>
+                <span :style="`color:${projectStatus['r1_'+bro]==='done'?'var(--green)':projectStatus['r1_'+bro]==='running'?'var(--yellow)':'var(--text3)'}`"
+                      x-text="projectStatus['r1_'+bro] || 'pending'"></span>
+              </div>
+              <div style="font-size:10px;margin-bottom:4px">
+                <span style="color:var(--text3)">R2: </span>
+                <span :style="`color:${projectStatus['r2_'+bro]==='done'?'var(--green)':projectStatus['r2_'+bro]==='running'?'var(--yellow)':'var(--text3)'}`"
+                      x-text="projectStatus['r2_'+bro] || 'pending'"></span>
+              </div>
+              <template x-if="bro === 'advisor'">
+                <div style="font-size:10px">
+                  <span style="color:var(--text3)">R3: </span>
+                  <span :style="`color:${projectStatus['r3_advisor']==='done'?'var(--green)':projectStatus['r3_advisor']==='running'?'var(--yellow)':'var(--text3)'}`"
+                        x-text="projectStatus['r3_advisor'] || 'pending'"></span>
+                </div>
+              </template>
+              <div x-show="projectStatus['file_r1_'+bro]" style="margin-top:8px;font-size:10px;color:var(--blue)" x-text="'📄 '+projectStatus['file_r1_'+bro]"></div>
+            </div>
+          </template>
+        </div>
+
+        <!-- R2 file links -->
+        <div x-show="projectStatus['file_r2_byte'] || projectStatus['file_r2_deepseek']" style="background:var(--bg2);border:1px solid var(--border);padding:15px;border-radius:4px">
+          <div style="font-size:11px;color:var(--yellow);font-weight:700;margin-bottom:8px">📋 R2 CROSS-REVIEWS</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <template x-for="bro in ['byte','deepseek','gemini','advisor']" :key="'r2f-'+bro">
+              <span x-show="projectStatus['file_r2_'+bro]"
+                    style="font-size:10px;color:var(--blue);cursor:pointer"
+                    x-text="'📄 '+bro+': '+projectStatus['file_r2_'+bro]"></span>
+            </template>
+          </div>
+        </div>
+
+        <!-- R3 synthesis preview -->
+        <div x-show="projectStatus.r3_preview" style="background:var(--bg2);border:1px solid var(--green);padding:15px;border-radius:4px">
+          <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:10px">✅ R3 SYNTHESIS — ADVISOR</div>
+          <pre style="font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-word" x-text="projectStatus.r3_preview"></pre>
+          <div x-show="projectStatus.file_r3_code" style="margin-top:8px;font-size:10px;color:var(--blue)" x-text="'📄 '+projectStatus.file_r3_code"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div x-show="currentSection === 'settings'" style="max-width:600px">
+        <h2>Settings</h2>
+
+        <div class="settings-group">
+          <h3>Theme</h3>
+          <div style="display:flex;gap:10px">
+            <button class="theme-btn" :class="{active: theme === 'dark'}" @click="setTheme('dark')">🌙 Dark</button>
+            <button class="theme-btn" :class="{active: theme === 'light'}" @click="setTheme('light')">☀️ Light</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3>Colors</h3>
+          <div class="setting-item">
+            <span class="setting-label">Primary Color</span>
+            <input type="color" x-model="colors.primary" class="color-picker">
+          </div>
+          <div class="setting-item">
+            <span class="setting-label">Accent Color</span>
+            <input type="color" x-model="colors.accent" class="color-picker">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3>Other</h3>
+          <div class="setting-item">
+            <span class="setting-label">Auto-scroll Chat</span>
+            <input type="checkbox" x-model="autoScroll">
+          </div>
+          <div class="setting-item">
+            <span class="setting-label">Poll Interval (seconds)</span>
+            <input type="number" x-model.number="pollInterval" min="1" max="60" style="width:60px;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:4px">
+          </div>
+        </div>
+
+        <!-- ── MODEL MANAGEMENT ── -->
+        <div class="settings-group" x-data="modelManager()" x-init="init()">
+          <h3>🤖 Models</h3>
+
+          <!-- Brother assignments -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">BROTHER → MODEL ASSIGNMENT</div>
+            <template x-for="(model, brother) in assignments" :key="brother">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                <span style="width:80px;color:var(--orange);font-size:12px;text-transform:uppercase" x-text="brother"></span>
+                <select
+                  :value="model"
+                  @change="setBrother(brother, $event.target.value)"
+                  style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+                  <template x-for="m in installedModels" :key="m.name">
+                    <option :value="m.name" :selected="m.name === model" x-text="m.name + ' (' + m.size + ')'"></option>
+                  </template>
+                </select>
+              </div>
+            </template>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <select x-model="setAllModel" style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+                <option value="">— set all brothers to —</option>
+                <template x-for="m in installedModels" :key="m.name">
+                  <option :value="m.name" x-text="m.name + ' (' + m.size + ')'"></option>
+                </template>
+              </select>
+              <button @click="setAll()" style="background:var(--orange);color:#000;border:none;padding:5px 12px;cursor:pointer;font-family:var(--font);font-size:12px">Apply All</button>
+            </div>
+            <div x-show="assignMsg" x-text="assignMsg" style="font-size:11px;color:var(--green);margin-top:6px"></div>
+          </div>
+
+          <!-- Custom model input -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">ADD YOUR OWN MODEL</div>
+            <div style="display:flex;gap:8px">
+              <input
+                x-model="customModelName"
+                @keydown.enter="addCustomModel()"
+                placeholder="e.g. my-model:latest  or  hf.co/user/repo"
+                style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px">
+              <button
+                @click="addCustomModel()"
+                style="background:var(--orange);color:#000;border:none;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:12px;white-space:nowrap">
+                + Add
+              </button>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px">
+              Paste any Ollama model name, HuggingFace path, or name of a model you already pulled.
+            </div>
+            <div x-show="customMsg" x-text="customMsg" style="font-size:11px;color:var(--green);margin-top:4px"></div>
+          </div>
+
+          <!-- Load from local GGUF file -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">LOAD FROM LOCAL FILE (.GGUF)</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <input
+                x-model="localGgufPath"
+                placeholder="C:\AI\models\your-model.Q4_K_M.gguf"
+                style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px;width:100%">
+              <div style="display:flex;gap:6px">
+                <input
+                  x-model="localModelName"
+                  placeholder="name (e.g. my-model)"
+                  style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px">
+                <button
+                  @click="loadLocal()"
+                  :disabled="loadingLocal"
+                  style="background:var(--blue);color:#fff;border:none;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:12px;white-space:nowrap">
+                  <span x-show="!loadingLocal">⬆ Load</span>
+                  <span x-show="loadingLocal">Loading...</span>
+                </button>
+              </div>
+              <input
+                x-model="localSystemPrompt"
+                placeholder="System prompt (optional)"
+                style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px;width:100%">
+            </div>
+            <!-- Load progress log -->
+            <div x-show="localLog.length > 0" style="margin-top:8px;background:var(--bg);border:1px solid var(--border);padding:8px;max-height:120px;overflow-y:auto;font-size:11px;color:var(--text2)">
+              <template x-for="(line, i) in localLog" :key="i">
+                <div x-text="line" :style="line.includes('success') ? 'color:var(--green)' : line.includes('failed') || line.includes('error') ? 'color:var(--red)' : ''"></div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Installed models list -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">INSTALLED MODELS</div>
+            <div style="background:var(--bg2);border:1px solid var(--border);max-height:160px;overflow-y:auto">
+              <template x-if="installedModels.length === 0">
+                <div style="padding:10px;color:var(--text3);font-size:11px">Ollama not reachable or no models installed.</div>
+              </template>
+              <template x-for="m in installedModels" :key="m.name">
+                <div style="display:flex;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--border);font-size:12px">
+                  <span style="color:var(--text)" x-text="m.name"></span>
+                  <span style="color:var(--text3)" x-text="m.size"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Download catalog -->
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">DOWNLOAD CATALOG</div>
+            <div style="background:var(--bg2);border:1px solid var(--border)">
+              <template x-for="m in catalog" :key="m.name">
+                <div style="padding:8px 10px;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                    <div style="flex:1;min-width:0">
+                      <div style="color:var(--text);font-size:12px" x-text="m.name"></div>
+                      <div style="color:var(--text3);font-size:11px;margin-top:2px" x-text="m.desc"></div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                      <span style="color:var(--text3);font-size:11px" x-text="m.size"></span>
+                      <span x-show="isInstalled(m.name)" style="color:var(--green);font-size:11px">✓ installed</span>
+                      <button
+                        x-show="!isInstalled(m.name) && pulling !== m.name"
+                        @click="pullModel(m.name)"
+                        style="background:var(--bg);color:var(--orange);border:1px solid var(--orange);padding:3px 10px;cursor:pointer;font-family:var(--font);font-size:11px">
+                        ⬇ Download
+                      </button>
+                      <span x-show="pulling === m.name" style="color:var(--yellow);font-size:11px">
+                        <span x-text="pullPct + '%'"></span> <span x-text="pullStatus"></span>
+                      </span>
+                    </div>
+                  </div>
+                  <!-- Progress bar -->
+                  <div x-show="pulling === m.name" style="margin-top:6px;background:var(--bg);height:4px;border-radius:2px">
+                    <div style="background:var(--orange);height:4px;border-radius:2px;transition:width 0.3s" :style="'width:' + pullPct + '%'"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <div x-show="pullMsg" x-text="pullMsg" style="font-size:11px;margin-top:6px" :style="pullErr ? 'color:var(--red)' : 'color:var(--green)'"></div>
+          </div>
+        </div>
+
+        <!-- ── BROTHER BACKENDS ── -->
+        <div class="settings-group" x-data="brotherBackends()" x-init="init()">
+          <h3>🌐 Brother Backends — Local or Cloud</h3>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:14px">
+            Each brother can run local (free, private) or any cloud provider. Advisor guides all — give him the strongest model.
+          </div>
+
+          <template x-for="brother in ['byte','deepseek','gemini','advisor']" :key="brother">
+            <div style="margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--border)"
+                 :style="brother==='advisor' ? 'border-color:var(--orange)' : ''">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <span style="font-size:12px;font-weight:bold;width:80px;text-transform:uppercase"
+                      :style="`color:${{ byte:'#0088ff', deepseek:'#ff4444', gemini:'#00ff66', advisor:'#ffaa00' }[brother]}`"
+                      x-text="brother"></span>
+                <span x-show="brother==='advisor'" style="font-size:10px;color:var(--orange);background:rgba(249,115,22,0.1);padding:2px 6px">
+                  GUIDE — use strongest model
+                </span>
+                <span style="font-size:10px;color:var(--text3);margin-left:auto"
+                      x-text="(config[brother]||{}).backend + ' / ' + ((config[brother]||{}).model||'').split(':')[0]"></span>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+                <!-- Backend selector -->
+                <div>
+                  <div style="font-size:10px;color:var(--text3);margin-bottom:3px">BACKEND</div>
+                  <select
+                    :value="(config[brother]||{}).backend||'local'"
+                    @change="setBrotherBackend(brother, $event.target.value)"
+                    style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+                    <template x-for="(p, pid) in providers" :key="pid">
+                      <option :value="pid"
+                              :selected="pid === (config[brother]||{}).backend"
+                              x-text="p.label + (p.requires_key && !providerStatus[pid] ? ' (no key)' : '')"></option>
+                    </template>
+                  </select>
+                </div>
+
+                <!-- Model selector -->
+                <div>
+                  <div style="font-size:10px;color:var(--text3);margin-bottom:3px">MODEL</div>
+                  <select
+                    :value="(config[brother]||{}).model||''"
+                    @change="setBrotherModel(brother, $event.target.value)"
+                    style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px">
+                    <template x-for="m in (providers[(config[brother]||{}).backend||'local']||{}).models||[]" :key="m">
+                      <option :value="m" :selected="m === (config[brother]||{}).model" x-text="m"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <!-- API key override -->
+              <div x-show="(providers[(config[brother]||{}).backend||'local']||{}).requires_key">
+                <div style="font-size:10px;color:var(--text3);margin-bottom:3px">API KEY OVERRIDE <span style="color:var(--text3)">(blank = use .env)</span></div>
+                <input type="password"
+                       :placeholder="providerStatus[(config[brother]||{}).backend] ? 'Key found in .env' : 'No key in .env — paste here'"
+                       :value="(config[brother]||{}).api_key||''"
+                       @change="setBrotherKey(brother, $event.target.value)"
+                       style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px 8px;font-family:var(--font);font-size:12px;box-sizing:border-box">
+              </div>
+            </div>
+          </template>
+
+          <div x-show="backendMsg" x-text="backendMsg"
+               style="font-size:11px;margin-top:6px"
+               :style="backendErr ? 'color:var(--red)' : 'color:var(--green)'"></div>
+        </div>
+
+        <!-- ── VAULT / SECURITY ── -->
+        <div class="settings-group" x-data="vaultManager()" x-init="init()">
+          <h3>🔒 Vault — Training Protection</h3>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:14px">
+            No one left behind. Months of training can't be ransomwared away.
+          </div>
+
+          <!-- Status row -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:10px;text-align:center">
+              <div style="font-size:18px;font-weight:bold" :style="status.crypto_available ? 'color:var(--green)' : 'color:var(--red)'" x-text="status.crypto_available ? '✓' : '✗'"></div>
+              <div style="font-size:10px;color:var(--text3)">AES-256</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:10px;text-align:center">
+              <div style="font-size:18px;font-weight:bold;color:var(--orange)" x-text="status.training_files || 0"></div>
+              <div style="font-size:10px;color:var(--text3)">Training Files</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:10px;text-align:center">
+              <div style="font-size:18px;font-weight:bold;color:var(--text)" x-text="status.backup_count || 0"></div>
+              <div style="font-size:10px;color:var(--text3)">Backups</div>
+            </div>
+          </div>
+
+          <!-- Install crypto if missing -->
+          <div x-show="!status.crypto_available" style="margin-bottom:14px;padding:10px;border:1px solid var(--red);background:rgba(255,68,68,0.07)">
+            <div style="font-size:12px;color:var(--red);margin-bottom:8px">⚠ cryptography library not installed</div>
+            <button @click="installCrypto()"
+              :disabled="installing"
+              style="background:var(--red);color:#fff;border:none;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:12px"
+              x-text="installing ? 'Installing...' : 'Install Now'">
+            </button>
+            <div x-show="installMsg" x-text="installMsg" style="font-size:11px;color:var(--text3);margin-top:6px"></div>
+          </div>
+
+          <!-- Auth toggle -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">API AUTHENTICATION</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+              <span style="font-size:12px;color:var(--text)">Require Bearer token on all API calls</span>
+              <button @click="toggleAuth()"
+                :style="status.auth_enabled ? 'background:var(--green);color:#000' : 'background:var(--bg2);color:var(--text);border:1px solid var(--border)'"
+                style="border:none;padding:5px 14px;cursor:pointer;font-family:var(--font);font-size:12px"
+                x-text="status.auth_enabled ? 'ON' : 'OFF'">
+              </button>
+            </div>
+            <div style="font-size:10px;color:var(--text3)">When ON: Android app and any client must send Authorization header.</div>
+          </div>
+
+          <!-- Token -->
+          <div style="margin-bottom:16px" x-show="status.auth_enabled || showToken">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">AUTH TOKEN</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <code style="flex:1;background:var(--bg);border:1px solid var(--border);padding:6px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                x-text="tokenVisible ? fullToken : (status.token_preview || '••••••••...••••')">
+              </code>
+              <button @click="toggleToken()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;cursor:pointer;font-family:var(--font);font-size:11px"
+                x-text="tokenVisible ? 'Hide' : 'Show'">
+              </button>
+              <button @click="copyToken()" style="background:var(--orange);color:#000;border:none;padding:5px 10px;cursor:pointer;font-family:var(--font);font-size:11px">Copy</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button @click="rotateToken()"
+                style="background:var(--bg2);border:1px solid var(--border);color:var(--red);padding:5px 12px;cursor:pointer;font-family:var(--font);font-size:11px">
+                Rotate Token
+              </button>
+              <span style="font-size:10px;color:var(--text3);align-self:center">Generates a new token — update all clients.</span>
+            </div>
+          </div>
+
+          <!-- Backup -->
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">ENCRYPTED BACKUP</div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px" x-show="status.last_backup">
+              Last: <span x-text="status.last_backup" style="color:var(--green)"></span>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:6px">
+              <input x-model="backupDest"
+                placeholder="Destination folder (blank = default vault/backups/)"
+                style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px">
+              <button @click="doBackup()"
+                :disabled="backingUp || !status.crypto_available"
+                style="background:var(--orange);color:#000;border:none;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:12px;white-space:nowrap"
+                x-text="backingUp ? 'Backing up...' : '⬇ Backup Now'">
+              </button>
+            </div>
+            <div style="font-size:10px;color:var(--text3)">
+              Bundles soul_brain.db + all training JSONL + brain files → AES-256-GCM encrypted .vault archive.
+            </div>
+            <div x-show="backupMsg" x-text="backupMsg" style="font-size:11px;margin-top:6px"
+              :style="backupErr ? 'color:var(--red)' : 'color:var(--green)'"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function app() {
+  return {
+    currentSection: 'overview',
+    theme: 'dark',
+    colors: { primary: '#f97316', accent: '#0088ff' },
+    autoScroll: true,
+    pollInterval: 3,
+
+    // Stats
+    modelCount: 0,
+    sessionCount: 0,
+
+    // Chat
+    chatMessages: [],
+    chatInput: '',
+    chatLoading: false,
+    chatPollInterval: null,
+
+    // Models
+    registeredModels: [],
+    searchModels: '',
+
+    // Project R1/R2/R3
+    projectTask: '',
+    projectExt: '.py',
+    projectRunning: false,
+    projectTaskId: null,
+    projectPhase: '',
+    projectStatus: {},
+    projectPollTimer: null,
+    modelBrowserPath: 'C:\\Models\\',
+    newModelName: '',
+    newModelSource: '',
+    newModelRole: 'general',
+    fileBrowserPath: 'C:\\',
+    fileBrowserItems: [],
+    fileBrowserLoading: false,
+
+    // Brainstorm
+    brainstormTopics: [],
+
+    // History (now shows chat)
+    // historyList removed - using chatMessages instead
+
+    // Drawing
+    isDrawing: false,
+    drawColor: '#00ff66',
+    brushSize: 3,
+    drawMode: 'pen', // 'pen' or 'eraser'
+    canvas: null,
+    ctx: null,
+    canvasInitialized: false,
+
+    // Terminal
+    terminal: null,
+    terminalSocket: null,
+    terminalInitialized: false,
+
+    // Speaker colors
+    speakerColors: {
+      'byte': '#0088ff',
+      'deepseek': '#ff4444',
+      'gemini': '#00ff66',
+      'advisor': '#ffaa00',
+      'maik': '#f97316',
+    },
+
+    init() {
+      this.loadStats();
+      this.loadRegisteredModels();
+      this.loadBrainstorm();
+      setInterval(() => this.loadStats(), 10000);
+    },
+
+    switchSection(section) {
+      this.currentSection = section;
+
+      if (section === 'chat') {
+        this.loadChatHistory();
+        if (!this.chatPollInterval) {
+          this.chatPollInterval = setInterval(() => this.loadChatHistory(true), this.pollInterval * 1000);
+        }
+      } else if (this.chatPollInterval) {
+        clearInterval(this.chatPollInterval);
+        this.chatPollInterval = null;
+      }
+
+      if (section === 'training') {
+        // Training tab - just display instructions
+      }
+
+      if (section === 'drawing') {
+        // Fresh canvas initialization
+        this.canvasInitialized = false;
+        setTimeout(() => this.initCanvas(), 50);
+      }
+    },
+
+    get filteredModels() {
+      const q = this.searchModels.toLowerCase();
+      return this.registeredModels.filter(m =>
+        m.name.toLowerCase().includes(q) ||
+        m.source.toLowerCase().includes(q) ||
+        m.role.toLowerCase().includes(q)
+      );
+    },
+
+    async loadStats() {
+      try {
+        const res = await fetch('/api/models/list').then(r => r.json());
+        this.modelCount = res.length || 0;
+      } catch(e) { }
+    },
+
+    async loadRegisteredModels() {
+      try {
+        const res = await fetch('/api/models/list').then(r => r.json());
+        this.registeredModels = res;
+      } catch(e) { }
+    },
+
+    async loadBrainstorm() {
+      try {
+        const res = await fetch('/council/ideas').then(r => r.json());
+        this.brainstormTopics = res;
+      } catch(e) { }
+    },
+
+    async loadJournal() {
+      try {
+        const res = await fetch('/api/journal').then(r => r.json());
+        this.journalContent = res.content || '';
+      } catch(e) { 
+        alert('✗ Error loading journal');
+      }
+    },
+
+    async saveJournal() {
+      if (this.journalSaving) return;
+      this.journalSaving = true;
+      try {
+        const res = await fetch('/api/journal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: this.journalContent })
+        }).then(r => r.json());
+        if (res.ok) {
+          alert('✓ Journal saved');
+        } else {
+          alert('✗ Save failed: ' + res.error);
+        }
+      } catch(e) {
+        alert('✗ Connection error');
+      } finally {
+        this.journalSaving = false;
+      }
+    },
+
+    async browseModels() {
+      const path = this.modelBrowserPath.trim();
+      if (!path) {
+        alert('Enter a path:\n- C:\\Models\\ (GGUF models)\n- ollama:mistral (Ollama format)\n- hf:mistralai/Mistral-7B (HuggingFace)');
+        return;
+      }
+      alert(`Model browser scanning: ${path}\n\nSupported formats:\n✓ *.gguf (local files)\n✓ ollama:modelname\n✓ hf:user/model\n\nTo register manually: use ADOPT button after entering model info`);
+    },
+
+    async adoptModel() {
+      const name = this.newModelName.trim();
+      const source = this.newModelSource.trim();
+      if (!name || !source) {
+        alert('Enter model name and source');
+        return;
+      }
+      try {
+        const res = await fetch('/api/models/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            source,
+            role: this.newModelRole
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`✓ Model "${name}" adopted!`);
+          this.newModelName = '';
+          this.newModelSource = '';
+          this.newModelRole = 'general';
+          this.loadRegisteredModels();
+        } else {
+          alert(`✗ Adoption failed: ${data.error || 'Unknown error'}`);
+        }
+      } catch(e) {
+        alert(`✗ Error: ${e.message}`);
+      }
+    },
+
+    async browsePath(path) {
+      if (!path) path = 'C:\\';
+      this.fileBrowserLoading = true;
+      try {
+        const res = await fetch('/api/files/browse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path, pattern: '*.gguf' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          this.fileBrowserPath = data.current_path;
+          this.fileBrowserItems = data.items || [];
+        } else {
+          alert(`Error: ${data.error}`);
+        }
+      } catch(e) {
+        alert(`Browse error: ${e.message}`);
+      }
+      this.fileBrowserLoading = false;
+    },
+
+    selectFile(filePath) {
+      this.newModelSource = filePath;
+      // Auto-fill name from filename
+      if (!this.newModelName) {
+        const fileName = filePath.split('\\').pop().replace('.gguf', '').replace('.bin', '');
+        this.newModelName = fileName;
+      }
+    },
+
+    selectDrive(drive) {
+      this.browsePath(drive);
+    },
+
+    openNotepad() {
+      // Open Notepad for model to write to
+      try {
+        const filename = `C:\\AI\\idea\\practice\\training_${Date.now()}.txt`;
+        window.open(`notepad.exe "${filename}"`, '_blank');
+        alert(`✓ Notepad opened\n\nFile: ${filename}\n\nTell your model to write there.`);
+      } catch(e) {
+        alert('Note: Use Ctrl+R to run notepad manually:\nC:\\Windows\\System32\\notepad.exe');
+      }
+    },
+
+    openPowerShell() {
+      // Open PowerShell for running commands
+      try {
+        window.open('powershell.exe', '_blank');
+        alert('✓ PowerShell opened\n\nRun commands there. Output will be visible to all brothers.');
+      } catch(e) {
+        alert('Note: Use Ctrl+R to run PowerShell manually:\nC:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe');
+      }
+    },
+
+
+    async deployModel(model) {
+      if (!model) return;
+      // Deployment means launching the model for active training
+      alert(`🚀 Launching "${model.name}" — check Training terminal for session`);
+    },
+
+    async loadChatHistory(silent = false) {
+      if (!silent) this.chatLoading = true;
+      try {
+        const res = await fetch('/council/quickchat/history?limit=100').then(r => r.json());
+        this.chatMessages = (res.messages || []).map(msg => ({
+          source: msg.source,
+          content: msg.content,
+          timestamp: msg.timestamp || msg.updated || new Date().toISOString()
+        }));
+        if (this.autoScroll) {
+          this.$nextTick(() => {
+            const el = this.$refs.chatMessages;
+            if (el) el.scrollTop = el.scrollHeight;
+          });
+        }
+      } catch(e) { }
+      finally {
+        if (!silent) this.chatLoading = false;
+      }
+    },
+
+    _scrollBottom() {
+      this.$nextTick(() => {
+        const el = this.$refs.chatMessages;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+    },
+
+    _parseMentions(text) {
+      const all = ['byte','deepseek','gemini','advisor'];
+      if (/@all\b/i.test(text) || !/@\w+/.test(text)) return all;
+      const matched = all.filter(b => new RegExp('@'+b,'i').test(text));
+      // if only @ext tags present (no brother names matched) → call all
+      return matched.length > 0 ? matched : all;
+    },
+
+    _isSpecialCmd(text) {
+      return /@r2\b|@audit\b/i.test(text);
+    },
+
+    async sendChatMessage() {
+      const text = this.chatInput.trim();
+      if (!text) return;
+
+      this.chatInput = '';
+      this.chatMessages.push({ source: 'maik', content: text, timestamp: new Date().toISOString() });
+      this._scrollBottom();
+
+      // @r2 and @audit go through quickchat (server handles the logic)
+      if (this._isSpecialCmd(text)) {
+        const all = ['byte','deepseek','gemini','advisor'];
+        const typingIds = {};
+        all.forEach(name => {
+          const id = `typing-${name}-${Date.now()}`;
+          typingIds[name] = id;
+          this.chatMessages.push({ source: name, content: '...', timestamp: new Date().toISOString(), typingId: id });
+        });
+        this._scrollBottom();
+
+        try {
+          const res = await fetch('/council/quickchat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text }),
+          }).then(r => r.json());
+
+          const now = new Date().toISOString();
+          // replace typing with real replies
+          all.forEach(name => {
+            const reply = (res.responses || {})[name];
+            const i = this.chatMessages.findIndex(m => m.typingId === typingIds[name]);
+            if (reply) {
+              if (i !== -1) this.chatMessages[i] = { source: name, content: reply, timestamp: now };
+              else this.chatMessages.push({ source: name, content: reply, timestamp: now });
+            } else {
+              if (i !== -1) this.chatMessages.splice(i, 1);
+            }
+          });
+          this._scrollBottom();
+        } catch(e) {
+          Object.values(typingIds).forEach(id => {
+            const i = this.chatMessages.findIndex(m => m.typingId === id);
+            if (i !== -1) this.chatMessages.splice(i, 1);
+          });
+        }
+        return;
+      }
+
+      // normal message — fire one fetch per brother in parallel
+      const brothers = this._parseMentions(text);
+      const typingIds = {};
+      brothers.forEach(name => {
+        const id = `typing-${name}-${Date.now()}`;
+        typingIds[name] = id;
+        this.chatMessages.push({ source: name, content: '...', timestamp: new Date().toISOString(), typingId: id });
+      });
+      this._scrollBottom();
+
+      brothers.forEach((name, idx) => {
+        fetch(`/api/chat/${name}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, log_user: idx === 0 }),
+        })
+        .then(r => r.json())
+        .then(data => {
+          const i = this.chatMessages.findIndex(m => m.typingId === typingIds[name]);
+          if (i !== -1) this.chatMessages[i] = { source: name, content: data.reply || '[no reply]', timestamp: new Date().toISOString() };
+          else this.chatMessages.push({ source: name, content: data.reply || '[no reply]', timestamp: new Date().toISOString() });
+          this._scrollBottom();
+        })
+        .catch(() => {
+          const i = this.chatMessages.findIndex(m => m.typingId === typingIds[name]);
+          if (i !== -1) this.chatMessages.splice(i, 1);
+        });
+      });
+    },
+
+    async runProject() {
+      if (!this.projectTask.trim() || this.projectRunning) return;
+      this.projectRunning = true;
+      this.projectStatus  = {};
+      this.projectPhase   = 'starting';
+      this.projectTaskId  = null;
+      if (this.projectPollTimer) clearInterval(this.projectPollTimer);
+
+      try {
+        const res  = await fetch('/api/project/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: this.projectTask, ext: this.projectExt }),
+        }).then(r => r.json());
+
+        if (!res.ok) { this.projectRunning = false; return; }
+        this.projectTaskId = res.task_id;
+
+        // poll every 2s for progress
+        this.projectPollTimer = setInterval(() => this.pollProject(), 2000);
+      } catch(e) {
+        this.projectRunning = false;
+      }
+    },
+
+    async pollProject() {
+      if (!this.projectTaskId) return;
+      try {
+        const res = await fetch(`/api/project/status/${this.projectTaskId}`).then(r => r.json());
+        if (res.ok) {
+          this.projectStatus = res.status;
+          this.projectPhase  = res.status.phase || '';
+          if (res.status.phase === 'done') {
+            this.projectRunning = false;
+            clearInterval(this.projectPollTimer);
+            this.projectPollTimer = null;
+          }
+        }
+      } catch(e) {}
+    },
+
+    async selectHistory(hist) {
+      alert(`View: ${hist.date || hist.updated}`);
+    },
+
+    getMsgColor(source) {
+      return this.speakerColors[source] || '#a0a0b0';
+    },
+
+    renderMarkdown(text) {
+      if (!text) return '';
+      return window.marked ? marked.parse(text) : text;
+    },
+
+    formatTime(timestamp) {
+      if (!timestamp) return '';
+      const d = new Date(timestamp);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    },
+
+    initTrainingTerminal() {
+      // No longer needed - using Notepad instead of xterm
+      this.terminalInitialized = true;
+    },
+
+    initDojoTerminal() {
+      if (this.terminalInitialized) return;
+      this.terminalInitialized = true;
+
+      // Add xterm.js dynamically if not present
+      if (!window.Terminal) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css';
+        document.head.appendChild(link);
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js';
+        script.onload = () => this.setupXterm();
+        document.body.appendChild(script);
+      } else {
+        this.setupXterm();
+      }
+    },
+
+    setupXterm() {
+      const term = new Terminal({
+        theme: {
+          background: '#000',
+          foreground: '#f97316',
+          cursor: '#f97316'
+        },
+        fontFamily: 'Consolas, monospace',
+        fontSize: 13,
+        cursorBlink: true
+      });
+      term.open(document.getElementById('dojo-terminal'));
+      
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      this.terminalSocket = new WebSocket(`${protocol}//${window.location.host}/ws/terminal`);
+
+      this.terminalSocket.onmessage = (ev) => term.write(ev.data);
+      term.onData((data) => this.terminalSocket.send(data));
+
+      term.writeln('\x1b[1;33m[Dojo Terminal Initialized]\x1b[0m');
+      term.writeln('Joint audit active. All brothers are watching.');
+    },
+
+    initCanvas() {
+      if (this.canvasInitialized) return;
+      const canvas = this.$refs.canvas;
+      if (!canvas) return;
+
+      // Set canvas size
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let isDrawing = false;
+      const self = this;
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left);
+        const y = (e.clientY - rect.top);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left);
+        const y = (e.clientY - rect.top);
+
+        if (self.drawMode === 'eraser') {
+          ctx.clearRect(x - self.brushSize, y - self.brushSize, self.brushSize * 2, self.brushSize * 2);
+        } else {
+          ctx.strokeStyle = self.drawColor;
+          ctx.lineWidth = self.brushSize;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      });
+
+      canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+        ctx.closePath();
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        isDrawing = false;
+        ctx.closePath();
+      });
+
+      this.canvasInitialized = true;
+    },
+
+    clearCanvas() {
+      if (!this.ctx || !this.canvas) return;
+      this.ctx.fillStyle = '#1a1a1a';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+
+    saveDrawing() {
+      if (!this.canvas) return;
+      const link = document.createElement('a');
+      link.href = this.canvas.toDataURL('image/png');
+      link.download = `drawing-${Date.now()}.png`;
+      link.click();
+    },
+
+    setTheme(t) {
+      this.theme = t;
+      if (t === 'light') {
+        document.documentElement.style.setProperty('--bg', '#f5f5f5');
+        document.documentElement.style.setProperty('--bg2', '#e8e8e8');
+        document.documentElement.style.setProperty('--text', '#333333');
+        document.documentElement.style.setProperty('--text2', '#666666');
+      } else {
+        document.documentElement.style.setProperty('--bg', '#0a0a0f');
+        document.documentElement.style.setProperty('--bg2', '#0f0f18');
+        document.documentElement.style.setProperty('--text', '#e0e0e0');
+        document.documentElement.style.setProperty('--text2', '#a0a0b0');
+      }
+    }
+  };
+}
+
+function modelManager() {
+  return {
+    installedModels: [],
+    assignments: {},
+    catalog: [],
+    setAllModel: '',
+    assignMsg: '',
+    pulling: '',
+    pullPct: 0,
+    pullStatus: '',
+    pullMsg: '',
+    pullErr: false,
+    customModelName: '',
+    customMsg: '',
+    localGgufPath: '',
+    localModelName: '',
+    localSystemPrompt: '',
+    localLog: [],
+    loadingLocal: false,
+
+    async init() {
+      await Promise.all([this.loadInstalled(), this.loadAssignments(), this.loadCatalog()]);
+    },
+
+    async loadInstalled() {
+      try {
+        const r = await fetch('/api/models/list');
+        const d = await r.json();
+        this.installedModels = d.models || [];
+      } catch(e) { this.installedModels = []; }
+    },
+
+    async loadAssignments() {
+      try {
+        const r = await fetch('/api/models/current');
+        const d = await r.json();
+        this.assignments = d.assignments || {};
+      } catch(e) {}
+    },
+
+    async loadCatalog() {
+      try {
+        const r = await fetch('/api/models/catalog');
+        const d = await r.json();
+        this.catalog = d.models || [];
+      } catch(e) {}
+    },
+
+    isInstalled(name) {
+      return this.installedModels.some(m => m.name === name);
+    },
+
+    async loadLocal() {
+      const path = this.localGgufPath.trim();
+      const name = this.localModelName.trim();
+      if (!path || !name) return;
+      this.loadingLocal = true;
+      this.localLog = ['Starting...'];
+
+      try {
+        const r = await fetch('/api/models/load_local', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({path, name, system: this.localSystemPrompt.trim()})
+        });
+
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '';
+
+        while (true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, {stream: true});
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            try {
+              const obj = JSON.parse(line.slice(5).trim());
+              this.localLog.push(obj.status || '');
+              if (obj.ok && obj.model) {
+                if (!this.isInstalled(obj.model)) {
+                  this.installedModels.unshift({name: obj.model, size: 'local'});
+                }
+                this.localGgufPath = '';
+                this.localModelName = '';
+              }
+            } catch(e) {}
+          }
+        }
+      } catch(e) {
+        this.localLog.push('Error: ' + e.message);
+      } finally {
+        this.loadingLocal = false;
+      }
+    },
+
+    addCustomModel() {
+      const name = this.customModelName.trim();
+      if (!name) return;
+      if (!this.isInstalled(name)) {
+        this.installedModels.unshift({name, size: 'custom'});
+      }
+      this.customModelName = '';
+      this.customMsg = `✓ "${name}" added to list — select it in the dropdowns above`;
+      setTimeout(() => this.customMsg = '', 4000);
+    },
+
+    async setBrother(brother, model) {
+      try {
+        const r = await fetch('/api/models/set', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({brother, model})
+        });
+        const d = await r.json();
+        if (d.ok) {
+          this.assignments = d.assignments;
+          this.assignMsg = `✓ ${brother} → ${model}`;
+          setTimeout(() => this.assignMsg = '', 3000);
+        }
+      } catch(e) { this.assignMsg = 'Error: ' + e.message; }
+    },
+
+    async setAll() {
+      if (!this.setAllModel) return;
+      try {
+        const r = await fetch('/api/models/set', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({brother: 'all', model: this.setAllModel})
+        });
+        const d = await r.json();
+        if (d.ok) {
+          this.assignments = d.assignments;
+          this.assignMsg = `✓ All brothers → ${this.setAllModel}`;
+          setTimeout(() => this.assignMsg = '', 3000);
+        }
+      } catch(e) { this.assignMsg = 'Error: ' + e.message; }
+    },
+
+    async pullModel(name) {
+      this.pulling = name;
+      this.pullPct = 0;
+      this.pullStatus = 'starting...';
+      this.pullMsg = '';
+      this.pullErr = false;
+
+      try {
+        const r = await fetch('/api/models/pull', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({model: name})
+        });
+
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '';
+
+        while (true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, {stream: true});
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            try {
+              const obj = JSON.parse(line.slice(5).trim());
+              this.pullStatus = obj.status || '';
+              this.pullPct = obj.pct || 0;
+              if (obj.error) { this.pullErr = true; this.pullMsg = obj.status; }
+            } catch(e) {}
+          }
+        }
+
+        if (!this.pullErr) {
+          this.pullMsg = `✓ ${name} downloaded successfully`;
+          await this.loadInstalled();
+        }
+      } catch(e) {
+        this.pullErr = true;
+        this.pullMsg = 'Download failed: ' + e.message;
+      } finally {
+        this.pulling = '';
+        this.pullPct = 0;
+        this.pullStatus = '';
+      }
+    }
+  };
+}
+
+function quickMode() {
+  return {
+    allMode: '',
+    quickModel: '',
+    quickKey: '',
+    modeMsg: '',
+    brotherStatus: null,
+
+    async init() {
+      await this.loadStatus();
+    },
+
+    async loadStatus() {
+      try {
+        const r = await fetch('/api/brothers/config');
+        const d = await r.json();
+        this.brotherStatus = d.config;
+        // Detect if all brothers are on the same backend
+        const backends = Object.values(d.config).map(b => b.backend);
+        if (new Set(backends).size === 1) this.allMode = backends[0];
+      } catch(e) {}
+    },
+
+    async setAll(mode) {
+      this.allMode = mode;
+      if (mode === 'local') await this.applyAll();
+    },
+
+    async applyAll() {
+      if (!this.allMode) return;
+      try {
+        const r = await fetch('/api/brothers/config/all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            backend: this.allMode,
+            model: this.quickModel.trim() || '',
+            api_key: this.quickKey.trim(),
+          }),
+        });
+        const d = await r.json();
+        if (d.ok) {
+          this.modeMsg = `All brothers -> ${d.backend} / ${d.model.split(':')[0]}`;
+          await this.loadStatus();
+        }
+      } catch(e) { this.modeMsg = e.message; }
+      setTimeout(() => this.modeMsg = '', 3000);
+    },
+  };
+}
+
+function brotherBackends() {
+  return {
+    config: {},
+    providers: {},
+    providerStatus: {},
+    backendMsg: '',
+    backendErr: false,
+    pending: {},   // track unsaved per-brother changes
+
+    async init() {
+      await this.load();
+    },
+
+    async load() {
+      try {
+        const r = await fetch('/api/brothers/config');
+        const d = await r.json();
+        this.config = d.config || {};
+        this.providers = d.providers || {};
+        this.providerStatus = d.providers_status || {};
+        this.pending = JSON.parse(JSON.stringify(this.config));
+      } catch(e) {}
+    },
+
+    setBrotherBackend(brother, backend) {
+      if (!this.config[brother]) this.config[brother] = {};
+      this.config[brother].backend = backend;
+      // Auto-set first model for that backend
+      const models = (this.providers[backend] || {}).models || [];
+      if (models.length) this.config[brother].model = models[0];
+      this.save(brother);
+    },
+
+    setBrotherModel(brother, model) {
+      if (!this.config[brother]) this.config[brother] = {};
+      this.config[brother].model = model;
+      this.save(brother);
+    },
+
+    setBrotherKey(brother, key) {
+      if (!this.config[brother]) this.config[brother] = {};
+      this.config[brother].api_key = key;
+      this.save(brother);
+    },
+
+    async save(brother) {
+      const cfg = this.config[brother] || {};
+      try {
+        const r = await fetch('/api/brothers/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brother,
+            backend: cfg.backend || 'local',
+            model: cfg.model || '',
+            api_key: cfg.api_key || '',
+          }),
+        });
+        const d = await r.json();
+        this.backendErr = !d.ok;
+        this.backendMsg = d.ok
+          ? `${brother}: ${d.backend} / ${(d.model||'').split(':')[0]}`
+          : (d.error || 'Error');
+      } catch(e) {
+        this.backendErr = true;
+        this.backendMsg = e.message;
+      }
+      setTimeout(() => this.backendMsg = '', 2500);
+    },
+  };
+}
+
+function vaultManager() {
+  return {
+    status: {},
+    tokenVisible: false,
+    fullToken: '',
+    showToken: false,
+    backupDest: '',
+    backingUp: false,
+    backupMsg: '',
+    backupErr: false,
+    installing: false,
+    installMsg: '',
+
+    async init() {
+      await this.loadStatus();
+    },
+
+    async loadStatus() {
+      try {
+        const r = await fetch('/api/vault/status');
+        this.status = await r.json();
+      } catch(e) {
+        this.status = { crypto_available: false, auth_enabled: false };
+      }
+    },
+
+    async toggleAuth() {
+      const enabled = !this.status.auth_enabled;
+      const r = await fetch('/api/vault/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled }),
+      });
+      const d = await r.json();
+      this.status.auth_enabled = d.auth_enabled;
+      if (enabled) this.showToken = true;
+    },
+
+    async toggleToken() {
+      if (!this.tokenVisible) {
+        const r = await fetch('/api/vault/token');
+        const d = await r.json();
+        this.fullToken = d.token;
+      }
+      this.tokenVisible = !this.tokenVisible;
+    },
+
+    async copyToken() {
+      if (!this.fullToken) {
+        const r = await fetch('/api/vault/token');
+        const d = await r.json();
+        this.fullToken = d.token;
+      }
+      await navigator.clipboard.writeText(this.fullToken);
+    },
+
+    async rotateToken() {
+      if (!confirm('Rotate token? All clients will need the new token.')) return;
+      const r = await fetch('/api/vault/token/rotate', { method: 'POST' });
+      const d = await r.json();
+      this.fullToken = d.token;
+      this.tokenVisible = true;
+      await this.loadStatus();
+    },
+
+    async doBackup() {
+      this.backingUp = true;
+      this.backupMsg = '';
+      this.backupErr = false;
+      try {
+        const body = {};
+        if (this.backupDest.trim()) body.dest = this.backupDest.trim();
+        const r = await fetch('/api/vault/backup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (d.success) {
+          this.backupMsg = `✓ ${d.size_mb} MB — ${d.path}`;
+          await this.loadStatus();
+        } else {
+          this.backupErr = true;
+          this.backupMsg = d.error || 'Backup failed';
+        }
+      } catch(e) {
+        this.backupErr = true;
+        this.backupMsg = e.message;
+      }
+      this.backingUp = false;
+    },
+
+    async installCrypto() {
+      this.installing = true;
+      this.installMsg = 'Installing...';
+      try {
+        const r = await fetch('/api/vault/install-crypto', { method: 'POST' });
+        const d = await r.json();
+        this.installMsg = d.message || d.error || '';
+        if (d.success) await this.loadStatus();
+      } catch(e) {
+        this.installMsg = e.message;
+      }
+      this.installing = false;
+    },
+  };
+}
+</script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</body>
+</html>

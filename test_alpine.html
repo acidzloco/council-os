@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Alpine Test</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #111; color: #fff; }
+    button { padding: 10px 20px; font-size: 14px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div x-data="{ count: 0 }">
+  <h1>Alpine.js Test</h1>
+  <p>Count: <span x-text="count"></span></p>
+  <button @click="count++">Click Me</button>
+</div>
+
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+</body>
+</html>

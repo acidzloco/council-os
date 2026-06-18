@@ -1,0 +1,17 @@
+flask==3.0.0
+flask-cors>=4.0.0
+flask-sock>=0.7.0
+anthropic>=0.105.0
+requests>=2.34.0
+python-dotenv>=1.2.0
+cryptography>=41.0.0
+google-generativeai>=0.8.0
+httpx>=0.28.0
+mcp>=1.27.0
+rich>=15.0.0
+
+# Optional — desktop UI (skip if web-only)
+PyQt6>=6.11.0
+
+# Optional — Windows terminal in Dojo (skip on Linux/Mac)
+pywinpty>=2.0.0

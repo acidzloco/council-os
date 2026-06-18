@@ -1,0 +1,5 @@
+FROM C:/AI/council_v3/vault/council.token
+
+PARAMETER temperature 0.75
+PARAMETER num_predict 512
+

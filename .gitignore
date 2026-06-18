@@ -1,0 +1,77 @@
+# API keys — NEVER commit
+.env
+*.env
+
+# Vault — encryption keys and personal tokens
+vault/council.key
+vault/council.token
+vault/vault_config.json
+vault/backups/
+vault/
+
+# Personal configs — each user generates their own
+brother_config.json
+model_config.json
+
+# Personal data — conversations, training, memories
+soul_brain.db
+*.db
+training_data/
+*.vault
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+ewbc_brain_log.txt
+
+# Android build artifacts
+council_android/build/
+council_android/.gradle/
+council_android/local.properties
+council_android/app/release/
+
+# Compiled Android APK
+*.apk
+*.aab
+
+# Temporary / test files
+*.tmp
+*.bak
+pentest_results*.txt
+
+# Internal scripts — not for public
+fix_*.py
+README_V4.md
+SYMPHONY_GHOST*.vbs
+logs/
+*.png
+*.jpg
+
+# Pentest injection test artifacts
+modelfiles/Modelfile.legit*
