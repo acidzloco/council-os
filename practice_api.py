@@ -130,7 +130,12 @@ def save_practice_session():
         save_dir = Path(r"C:\AI\idea\practice\shared")
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        save_file = save_dir / f"{name}.log"
+        safe_name = Path(name).name  # strip any directory components
+        if not safe_name:
+            return jsonify({"error": "Invalid session name"}), 400
+        save_file = (save_dir / f"{safe_name}.log").resolve()
+        if not str(save_file).startswith(str(save_dir.resolve())):
+            return jsonify({"error": "Invalid session name"}), 400
         with open(save_file, 'w', encoding='utf-8') as f:
             f.write(f"# Practice Session: {name}\n")
             f.write(f"# Started: {practice_session['started']}\n")

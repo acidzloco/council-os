@@ -1695,9 +1695,15 @@ def browse_files():
         path = data.get("path", "C:\\")
         pattern = data.get("pattern", "*")
 
-        # Security: prevent directory traversal
+        # Security: prevent directory traversal — cross-platform safe
         p = Path(path).resolve()
-        if not str(p).startswith(("C:\\", "D:\\", "E:\\", "F:\\")):
+        import platform, os
+        if platform.system() == "Windows":
+            allowed_roots = [f"{d}:\\" for d in "CDEFGHIJKLMNOPQRSTUVWXYZ"]
+        else:
+            home = str(Path.home())
+            allowed_roots = [home, "/storage", "/sdcard", "/data/user"]
+        if not any(str(p).startswith(root) for root in allowed_roots):
             return jsonify({"error": "Invalid path"}), 400
 
         if not p.exists():

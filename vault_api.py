@@ -110,7 +110,13 @@ def backup():
     try:
         data = request.json or {}
         dest = data.get("dest")
-        dest_path = Path(dest) if dest else None
+        dest_path = None
+        if dest:
+            resolved = Path(dest).resolve()
+            allowed = Path.home().resolve()
+            if not str(resolved).startswith(str(allowed)):
+                return jsonify({"error": "Invalid backup path — must be within home directory"}), 400
+            dest_path = resolved
         vault_file = create_backup(dest_path)
         stat = vault_file.stat()
         return jsonify({
